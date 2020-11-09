@@ -19,11 +19,6 @@ namespace ST_Rocket_Motor_Test_Stand_II
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
-
-
-           
-
         }
-
     }
 }
