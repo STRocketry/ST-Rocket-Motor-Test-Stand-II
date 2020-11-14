@@ -127,16 +127,16 @@ namespace ST_Rocket_Motor_Test_Stand_II
         private void ArduinoButton_Click(object sender, EventArgs e)
         {
             comboBox.Items.Clear();
-            // Получаем список COM портов доступных в системе
+            // Get a list of COM ports available in the system
             string[] portnames = SerialPort.GetPortNames();
-            // Проверяем есть ли доступные
+            // Check whether there are available COM ports
             if (portnames.Length == 0)
             {
                 MessageBox.Show("COM PORT not found");
             }
             foreach (string portName in portnames)
             {
-                //добавляем доступные COM порты в список           
+                // Add available COM ports to the list           
                 comboBox.Items.Add(portName);
                 Console.WriteLine(portnames.Length);
                 if (portnames[0] != null)
@@ -154,12 +154,16 @@ namespace ST_Rocket_Motor_Test_Stand_II
             serialPort1.Open();
             connectButton.Text = "Disconnect";
             connectButton.BackColor = Color.DarkSlateBlue;
-            connectButton.ForeColor = Color.White;            
+            connectButton.ForeColor = Color.White;
+            OperatingRadioButton.Enabled = true;
+            CalibratingRadioButton.Enabled = true;
         }
 
         private void DisconnectFromArduino()
         {
+            SendCommandToArduino("0", 4, 50);
             serialPort1.Close();
+            InputData = String.Empty;
             connectButton.Text = "Connect";
             connectButton.BackColor = SystemColors.Control;
             connectButton.ForeColor = SystemColors.ControlText;
@@ -167,9 +171,11 @@ namespace ST_Rocket_Motor_Test_Stand_II
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // При закрытии программы, закрываем порт
+            SendCommandToArduino("0", 4, 50);
+            // Close the port while closing the application
             if (serialPort1.IsOpen) serialPort1.Close();
         }
+
 
         private void ConnectButton_Click(object sender, EventArgs e)
         {
@@ -233,7 +239,11 @@ namespace ST_Rocket_Motor_Test_Stand_II
 
 
                 CheckData(finalData);
-                WriteAsyncToLog(finalData.ToString(), fullPath, timeSec);
+                if (fullPath != String.Empty)
+                {
+                    WriteAsyncToLog(finalData.ToString(), fullPath, timeSec);
+                }
+                    
                 
             }
 
@@ -252,7 +262,10 @@ namespace ST_Rocket_Motor_Test_Stand_II
                     else
                     {
                         calibrationData /= 100;
-                        CalibrationWriteAsync(textBoxInputGramms.Text, fullPath, calibrationData);
+                        if (fullPath != String.Empty)
+                        {
+                            CalibrationWriteAsync(textBoxInputGramms.Text, fullPath, calibrationData);
+                        }
                         counter = 0;
                         CalibrateButton.Enabled = true;
                     }
@@ -401,7 +414,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
         }
 
 
-        static async void SetLedRX(Form1 form, bool state)
+/*        static async void SetLedRX(Form1 form, bool state)
         {
             form.pictureBoxLedRX.Visible = state;
             await Task.Run(async () =>
@@ -409,7 +422,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
                
                 await Task.Delay(1);
             });
-        }
+        }*/
 
 
 
@@ -461,11 +474,9 @@ namespace ST_Rocket_Motor_Test_Stand_II
 
                // pictureBoxLedRX.Visible = true;
                 TX.BackColor = Color.Red;
-                for (int i = 1; i < 4; i++)
-                {
-                    serialPort1.Write("1");
-                    Thread.Sleep(50);
-                }
+
+                SendCommandToArduino("1", 4, 50);
+
                 TX.BackColor = Color.Gray;
                // pictureBoxLedRX.Visible = false;
 
@@ -484,11 +495,9 @@ namespace ST_Rocket_Motor_Test_Stand_II
 
                 RX.BackColor = Color.Gray;
                 TX.BackColor = Color.Red;
-                for (int i = 1; i < 4; i++)
-                {
-                    serialPort1.Write("0");
-                    Thread.Sleep(50);
-                }
+
+                SendCommandToArduino("0", 4, 50);
+
                 TX.BackColor = Color.Gray;
                 InputData = String.Empty;
 
@@ -516,6 +525,18 @@ namespace ST_Rocket_Motor_Test_Stand_II
             CalibratingRadioButton.Enabled = true;            
         }
 
+
+        private void SendCommandToArduino(string signal, int iteraton, int delayMs)
+        {
+            if (serialPort1.IsOpen)
+            {
+                for (int i = 1; i < iteraton; i++)
+                {
+                    serialPort1.Write(signal);
+                    Thread.Sleep(delayMs);
+                }
+            }
+        } 
 
         private void ResultCalculation (double[] resultArray)
         {
@@ -787,9 +808,14 @@ namespace ST_Rocket_Motor_Test_Stand_II
 
         }
 
-        private void Form1_FormClosing_1(object sender, FormClosingEventArgs e)
-        {
-            ButtonStop_Click(sender, e);
-        }
+
     }
 }
+
+
+/*Possible improvements:
+ * 1) Get Time - to use timer and threads
+ * 2) Add new font - digits
+ * 3) Displaying of mode's boxes
+ * 4) Displaying point coordinates on the chart
+*/
