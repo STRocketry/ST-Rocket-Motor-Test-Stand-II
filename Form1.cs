@@ -19,8 +19,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
         int counter = 0;
         double ratio1 = 1;
         double ratio2 = 1;
-        double startTime;
-        long timeNow;
+        DateTime startTime;
         double timeSec;
 
         bool start_stop = false;
@@ -30,9 +29,12 @@ namespace ST_Rocket_Motor_Test_Stand_II
         string AxisYOperatingName;
         string AxisYCalibratingName = "Parrots";
 
-        internal delegate void SerialDataReceivedEventHandlerDelegate(
-                object sender, SerialDataReceivedEventArgs e);
+      // I don't remember why I added the internal delegate below. Anyway, the app works without it
+        //  internal delegate void SerialDataReceivedEventHandlerDelegate(object sender, SerialDataReceivedEventArgs e);
+       
         delegate void SetTextCallback(string text);
+        delegate void DisplayLedCallBack(bool OnOff);
+
         string InputData = String.Empty;
         string fullPath = String.Empty;
 
@@ -111,7 +113,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
         }
 
         private void Form1_Load(object sender, EventArgs e)
-        {
+        {           
             try
             {
                 chart1.Series[0].Points.AddXY(0, 0);
@@ -120,32 +122,20 @@ namespace ST_Rocket_Motor_Test_Stand_II
             {
                 MessageBox.Show("Chart is not working :(");
             }
+           // GetCOMports();
         }
 
         
 
         private void ArduinoButton_Click(object sender, EventArgs e)
         {
-            comboBox.Items.Clear();
-            // Get a list of COM ports available in the system
-            string[] portnames = SerialPort.GetPortNames();
-            // Check whether there are available COM ports
-            if (portnames.Length == 0)
-            {
-                MessageBox.Show("COM PORT not found");
-            }
-            foreach (string portName in portnames)
-            {
-                // Add available COM ports to the list           
-                comboBox.Items.Add(portName);
-                Console.WriteLine(portnames.Length);
-                if (portnames[0] != null)
-                {
-                    comboBox.SelectedItem = portnames[0];
-                }
-                
-            }
-       }
+            GetCOMports();
+        }
+
+        private void COMPortsDropdown_Click(object sender, EventArgs e)
+        {
+            GetCOMports();
+        }
 
         private void ConnectToArduino()
         {
@@ -189,28 +179,67 @@ namespace ST_Rocket_Motor_Test_Stand_II
             }
         }
 
-        private void DataReceivedHandler(
-                       object sender,
-                       SerialDataReceivedEventArgs e)
+
+        private void GetCOMports()
         {
-            RX.BackColor = Color.GreenYellow;
-           // SetLedRX(this, true);
+            comboBox.Items.Clear();
+            // Get a list of COM ports available in the system
+            string[] portnames = SerialPort.GetPortNames();
+            // Check whether there are available COM ports
+            if (portnames.Length == 0)
+            {
+                MessageBox.Show("COM PORT not found");
+            }
+            foreach (string portName in portnames)
+            {
+                // Add available COM ports to the list           
+                comboBox.Items.Add(portName);
+                Console.WriteLine(portnames.Length);
+                if (portnames[0] != null)
+                {
+                    comboBox.SelectedItem = portnames[0];
+                }
+
+            }
+        }
+
+
+        private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+        {
+            BeginInvoke(new DisplayLedCallBack(SetLedRX), new object[] {true});           
 
             //InputData = serialPort1.ReadExisting();
             InputData = serialPort1.ReadTo("\r\n");
             if (InputData != String.Empty)
             {
-                this.BeginInvoke(new SetTextCallback(SetText), new object[] { InputData });
+                BeginInvoke(new SetTextCallback(SetText), new object[] { InputData });                
             }
         }
+
+
+        private void SetLedRX(bool OnOff)
+        {
+            if (OnOff)
+            {
+                pictureBoxLedRX.Visible = true;
+                pictureBoxLedRXGray.Visible = false;
+                RX.BackColor = Color.GreenYellow;
+            }
+            else
+            {
+                pictureBoxLedRX.Visible = false;
+                pictureBoxLedRXGray.Visible = true;
+                RX.BackColor = Color.Gray;
+            }
+        }
+      
 
         private void SetText(string inputData)
         {
             textBox1.AppendText(Environment.NewLine + inputData);
             textBox1.ScrollToCaret();
 
-            timeNow = GetTimeInMs();
-            timeSec = (timeNow - startTime) / 1000;
+            timeSec = (DateTime.Now - startTime).TotalSeconds;
             
             if (timeSec>= chart1.ChartAreas[0].AxisX.Maximum && chart1.ChartAreas[0].AxisX.Maximum != Double.NaN) 
             {
@@ -230,7 +259,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
 
                 try
                 {
-                    chart1.Series[0].Points.AddXY(timeSec, finalData);
+                    chart1.Series[0].Points.AddXY(timeSec.ToString("0.0"), finalData);
                 }
                 catch
                 {
@@ -283,8 +312,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
                 
             }
 
-                RX.BackColor = Color.Gray;
-               // SetLedRX(this, false);
+            SetLedRX(false);
         }
 
         private int GetFinalData (string inputData)
@@ -381,8 +409,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
             {
                 using (StreamWriter sw = new StreamWriter(writePath, true, System.Text.Encoding.Default))
                 {
-                    string log = timeMs + "  " + finalData;
-                    //string log = millisecs + "  " + finalData;
+                    string log = String.Format("{0:0.000} {1}", timeMs, finalData);
                     await sw.WriteLineAsync(log);
                 }
 
@@ -414,18 +441,6 @@ namespace ST_Rocket_Motor_Test_Stand_II
         }
 
 
-/*        static async void SetLedRX(Form1 form, bool state)
-        {
-            form.pictureBoxLedRX.Visible = state;
-            await Task.Run(async () =>
-            {
-               
-                await Task.Delay(1);
-            });
-        }*/
-
-
-
         private void ButtonErase_Click(object sender, EventArgs e)
         {
             chart1.Series[0].Points.Clear();
@@ -453,7 +468,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
         {
             if (serialPort1.IsOpen && InputData == String.Empty)
             {
-                startTime = GetTimeInMs();
+                startTime = DateTime.Now;
                 counter = 0;
                 CalibrateButton.Enabled = true;
 
@@ -472,13 +487,13 @@ namespace ST_Rocket_Motor_Test_Stand_II
                     CreateCalibrationFile();
                 }
 
-               // pictureBoxLedRX.Visible = true;
+               
                 TX.BackColor = Color.Red;
 
                 SendCommandToArduino("1", 4, 50);
 
                 TX.BackColor = Color.Gray;
-               // pictureBoxLedRX.Visible = false;
+               
 
                 OperatingRadioButton.Enabled = false;
                 CalibratingRadioButton.Enabled = false;
@@ -493,7 +508,7 @@ namespace ST_Rocket_Motor_Test_Stand_II
             {
                 CalibrateButton.Enabled = true;
 
-                RX.BackColor = Color.Gray;
+                SetLedRX(false);
                 TX.BackColor = Color.Red;
 
                 SendCommandToArduino("0", 4, 50);
@@ -673,15 +688,6 @@ namespace ST_Rocket_Motor_Test_Stand_II
         {
             date1 = DateTime.Now;
             return date1.ToString("yyyyMMdd-HH-mm-ss");
-        }
-
-        private long GetTimeInMs()
-        {
-            date1 = DateTime.Now;
-            int min = int.Parse(date1.ToString("mm"));
-            int sec = int.Parse(date1.ToString("ss"));
-            int ms = int.Parse(date1.ToString("fff"));
-            return min *60 *1000 +sec*1000 + ms;
         }
 
         private void CreateLogFile()

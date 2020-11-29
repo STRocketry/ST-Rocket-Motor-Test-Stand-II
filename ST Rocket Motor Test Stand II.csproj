@@ -116,6 +116,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Gray_led.png" />
     <Content Include="rocketicon.ico" />
   </ItemGroup>
   <ItemGroup>

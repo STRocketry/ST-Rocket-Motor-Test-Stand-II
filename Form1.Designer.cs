@@ -40,6 +40,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.RX = new System.Windows.Forms.Label();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.form1BindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.buttonStart = new System.Windows.Forms.Button();
             this.buttonErase = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
@@ -87,8 +88,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.pictureBoxLedRX = new System.Windows.Forms.PictureBox();
-            this.form1BindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.pictureBoxLedRXGray = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.form1BindingSource)).BeginInit();
             this.groupBoxLoadCell.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.thresholdNumericUpDown)).BeginInit();
             this.groupBoxResult.SuspendLayout();
@@ -97,7 +99,7 @@
             this.groupBoxTestData.SuspendLayout();
             this.groupBoxAxis.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLedRX)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.form1BindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLedRXGray)).BeginInit();
             this.SuspendLayout();
             // 
             // ratioBox
@@ -132,6 +134,7 @@
             this.comboBox.Name = "comboBox";
             this.comboBox.Size = new System.Drawing.Size(90, 21);
             this.comboBox.TabIndex = 1;
+            this.comboBox.Click += new System.EventHandler(this.COMPortsDropdown_Click);
             // 
             // connectButton
             // 
@@ -204,6 +207,10 @@
             this.chart1.Size = new System.Drawing.Size(652, 278);
             this.chart1.TabIndex = 5;
             this.chart1.Text = "chart1";
+            // 
+            // form1BindingSource
+            // 
+            this.form1BindingSource.DataSource = typeof(ST_Rocket_Motor_Test_Stand_II.Form1);
             // 
             // buttonStart
             // 
@@ -726,15 +733,21 @@
             this.pictureBoxLedRX.TabStop = false;
             this.pictureBoxLedRX.Visible = false;
             // 
-            // form1BindingSource
+            // pictureBoxLedRXGray
             // 
-            this.form1BindingSource.DataSource = typeof(ST_Rocket_Motor_Test_Stand_II.Form1);
+            this.pictureBoxLedRXGray.Image = global::ST_Rocket_Motor_Test_Stand_II.Properties.Resources.Gray_led;
+            this.pictureBoxLedRXGray.Location = new System.Drawing.Point(48, 132);
+            this.pictureBoxLedRXGray.Name = "pictureBoxLedRXGray";
+            this.pictureBoxLedRXGray.Size = new System.Drawing.Size(20, 20);
+            this.pictureBoxLedRXGray.TabIndex = 27;
+            this.pictureBoxLedRXGray.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 421);
+            this.Controls.Add(this.pictureBoxLedRXGray);
             this.Controls.Add(this.pictureBoxLedRX);
             this.Controls.Add(this.groupBoxAxis);
             this.Controls.Add(this.groupBoxTestData);
@@ -760,6 +773,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.form1BindingSource)).EndInit();
             this.groupBoxLoadCell.ResumeLayout(false);
             this.groupBoxLoadCell.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.thresholdNumericUpDown)).EndInit();
@@ -774,7 +788,7 @@
             this.groupBoxAxis.ResumeLayout(false);
             this.groupBoxAxis.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLedRX)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.form1BindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxLedRXGray)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -838,6 +852,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.PictureBox pictureBoxLedRX;
+        private System.Windows.Forms.PictureBox pictureBoxLedRXGray;
     }
 }
 

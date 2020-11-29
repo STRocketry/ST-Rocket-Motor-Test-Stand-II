@@ -59,5 +59,15 @@ namespace ST_Rocket_Motor_Test_Stand_II.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Gray_led {
+            get {
+                object obj = ResourceManager.GetObject("Gray_led", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
